@@ -1,0 +1,12 @@
+LICENSE
+pyproject.toml
+setup.py
+src/AsyncRequests.py
+src/RequestsType.py
+src/helper.py
+src/async_requests.egg-info/PKG-INFO
+src/async_requests.egg-info/SOURCES.txt
+src/async_requests.egg-info/dependency_links.txt
+src/async_requests.egg-info/requires.txt
+src/async_requests.egg-info/top_level.txt
+test/test.py

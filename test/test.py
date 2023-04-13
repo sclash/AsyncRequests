@@ -4,7 +4,7 @@ from RequestsType import RequestType
 
 
 url = ['https://google.com' for i in range(50)]
-a = AsyncHTTP(url = url, n_producers =10, n_consumers=10)
+a = AsyncHTTP(url = url, N_PRODUCERS =10, N_CONSUMERS=10)
 a.queue
 a.url_chunk
 a.n_producers
