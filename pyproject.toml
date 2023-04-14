@@ -18,6 +18,8 @@ classifiers = [
 keywords = ["http", "requests", "api", "asyncio"]
 dependencies = [
     "requests",
+    "requests-oauthlib",
+    "dataclasses",
     'tomli; python_version < "3.11"',
 ]
 requires-python = ">=3.9"

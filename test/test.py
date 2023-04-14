@@ -1,38 +1,50 @@
 from AsyncRequests import AsyncHTTP 
 from time import perf_counter
 from RequestsType import RequestType
+from RequestObject import RequestObject
+from dataclasses import asdict
+
+from time import perf_counter
 
 
-url = ['https://google.com' for i in range(50)]
-a = AsyncHTTP(url = url, N_PRODUCERS =10, N_CONSUMERS=10)
-a.queue
-a.url_chunk
-# a.n_producers
+api = 'https://api.publicapis.org/entries'
 headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'}
 
 
+endpoints = [RequestObject(url = api, params = {"title":"cat"}),
+             RequestObject(url = api, params = {"title":"dog"}),
+             RequestObject(url = api, params = {"title":"house"}),
+             RequestObject(url = api, params = {"title":"weath"}),
+             RequestObject(url = api, params = {"title":"py"})]
 
+a = AsyncHTTP(
+    url = endpoints,
+    N_PRODUCERS=5,
+    N_CONSUMERS=5
+)
+
+def get_json(r):
+    return r.json()
 
 start = perf_counter()
-def example_callback(r):
-    return r.status_code
 a.async_request(
-    request_type=RequestType.GET,
-    callback = example_callback,
+    request_type= RequestType.GET,
+    callback=get_json,
     headers = headers
 )
-# a.async_get(headers = headers, callback = example_callback)
-end = perf_counter()
-print(f"Async EXEC TIME: {end-start}")
 print(a.response)
+end = perf_counter()
+print(f"Async EXECUTION TIME: {end-start}")
 
-import requests 
+
+
+import requests
+
 start = perf_counter()
-requests.get(url = url[0], headers = headers)
-r = []
-for i in url:
-    r.append(requests.get(i).status_code)
+
+res = []
+for e in endpoints:
+    res.append(requests.get(e.url,params = e.params, headers = headers).json()) 
 
 end = perf_counter()
-print(f"Sync EXEC TIME: {end-start}")
-print(r)
+print(f"Sync EXECUTION TIME: {end-start}")

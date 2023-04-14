@@ -6,6 +6,8 @@ from helper import split_chunk
 from typing import List, Callable, Optional
 
 from RequestsType import RequestType
+from RequestObject import RequestObject
+from dataclasses import asdict
 
 class AsyncRequests:
     url:List[str]
@@ -26,8 +28,10 @@ class AsyncRequests:
         self.url_chunk = split_chunk(self.url, self.N_PRODUCERS)
         self.response = []
 
-    def sync_http(self, url:str, **kwargs):
+    def sync_http(self, r_obj: RequestObject, **fixed_kwargs):
         try:
+            url = r_obj.url
+            kwargs = {k: asdict(r_obj)[k] for k in asdict(r_obj).keys() if k != 'url'} | fixed_kwargs
             r = self.request_type(url, **kwargs)
             r.raise_for_status()
             return r
@@ -35,13 +39,13 @@ class AsyncRequests:
             print(f"Request exception: {e}")
             return r.status_code
     
-    async def __async_http_thread(self, url: str, **kwargs):
-        return await asyncio.to_thread(self.sync_http, url, **kwargs)
+    async def __async_http_thread(self, r_obj: RequestObject, **fixed_kwargs):
+        return await asyncio.to_thread(self.sync_http, r_obj , **fixed_kwargs)
     
-    async def __produce(self, chunk: List[str], **kwargs):
+    async def __produce(self, chunk: List[RequestObject], **fixed_kwargs):
         try:
-            for url in chunk:
-                r = await self.__async_http_thread(url, **kwargs)
+            for r_obj in chunk:
+                r = await self.__async_http_thread(r_obj, **fixed_kwargs)
                 await self.queue.put(r)
         except Exception as e:
             print(e)
@@ -61,8 +65,8 @@ class AsyncRequests:
                 self.queue.task_done()
                 pass
 
-    async def __run(self,callback: Optional[Callable] = None, **kwargs):
-        producers = [asyncio.create_task(self.__produce(chunk, **kwargs)) for chunk in self.url_chunk]
+    async def __run(self,callback: Optional[Callable] = None, **fixed_kwargs):
+        producers = [asyncio.create_task(self.__produce(chunk, **fixed_kwargs)) for chunk in self.url_chunk]
         asyncio.gather(*producers)
         consumers = [asyncio.create_task(self.__consume(callback)) for i in range(self.N_CONSUMERS)]
         await asyncio.gather(*producers)
