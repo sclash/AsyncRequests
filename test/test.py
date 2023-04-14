@@ -1,11 +1,9 @@
-from AsyncRequests import AsyncHTTP 
+from AsyncRequests import AsyncHTTP
 from time import perf_counter
 from RequestsType import RequestType
 from RequestObject import RequestObject
 from dataclasses import asdict
-
-from time import perf_counter
-
+import asyncio
 
 api = 'https://api.publicapis.org/entries'
 headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'}
@@ -22,7 +20,7 @@ a = AsyncHTTP(
     N_PRODUCERS=5,
     N_CONSUMERS=5
 )
-
+len(a.url_chunk)
 def get_json(r):
     return r.json()
 
@@ -32,7 +30,7 @@ a.async_request(
     callback=get_json,
     headers = headers
 )
-print(a.response)
+# print(a.response)
 end = perf_counter()
 print(f"Async EXECUTION TIME: {end-start}")
 
@@ -48,3 +46,6 @@ for e in endpoints:
 
 end = perf_counter()
 print(f"Sync EXECUTION TIME: {end-start}")
+
+len(a.response)
+

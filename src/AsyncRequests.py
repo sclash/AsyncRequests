@@ -9,6 +9,15 @@ from RequestsType import RequestType
 from RequestObject import RequestObject
 from dataclasses import asdict
 
+import logging
+
+c_handler = logging.StreamHandler()
+c_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(lineno)s - %(message)s', datefmt= '%d-%m-%Y %H:%M:%S')
+c_handler.setFormatter(c_format)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.addHandler(c_handler)
+
 class AsyncRequests:
     url:List[str]
     queue: asyncio.Queue()
@@ -16,7 +25,7 @@ class AsyncRequests:
     N_CONSUMERS: int
     response: List[requests.Response]
 
-    def __init__(self, url: List[str], 
+    def __init__(self, url: List[RequestObject], 
                 request_type:RequestType = None,
                 N_PRODUCERS: Optional[int] = 50,
                 N_CONSUMERS: Optional[int] = 50):
@@ -27,16 +36,23 @@ class AsyncRequests:
         self.N_CONSUMERS = N_CONSUMERS
         self.url_chunk = split_chunk(self.url, self.N_PRODUCERS)
         self.response = []
+        self.error_response = []
 
     def sync_http(self, r_obj: RequestObject, **fixed_kwargs):
         try:
             url = r_obj.url
-            kwargs = {k: asdict(r_obj)[k] for k in asdict(r_obj).keys() if k != 'url'} | fixed_kwargs
+            var_kwargs = {k: asdict(r_obj)[k] for k in asdict(r_obj).keys() if k != 'url' and asdict(r_obj)[k]!=None} 
+            # kwargs = {k: asdict(r_obj)[k] for k in asdict(r_obj).keys() if k != 'url'} | fixed_kwargs
+            kwargs = var_kwargs | fixed_kwargs
             r = self.request_type(url, **kwargs)
             r.raise_for_status()
+            logger.info(f"SUCCESSFULL Request for {r_obj.url} - {var_kwargs}")
             return r
         except Exception as e:
-            print(f"Request exception: {e}")
+            self.error_response.append((r_obj, r.status_code))
+            logger.error(f"Request ERROR for {r_obj.url}: {e}")
+
+            # print(f"Request exception: {e}")
             return r.status_code
     
     async def __async_http_thread(self, r_obj: RequestObject, **fixed_kwargs):
@@ -45,9 +61,12 @@ class AsyncRequests:
     async def __produce(self, chunk: List[RequestObject], **fixed_kwargs):
         try:
             for r_obj in chunk:
+                # logger.info(f"Producer checking: {r_obj.url}")
                 r = await self.__async_http_thread(r_obj, **fixed_kwargs)
+
                 await self.queue.put(r)
         except Exception as e:
+            logger.error(f"PRODUCER ERROR: {r_obj}")
             print(e)
 
     async def __consume(self, callback: Optional[Callable] = None):
@@ -59,16 +78,20 @@ class AsyncRequests:
                         self.response.append(callback(data))
                     else:
                         self.response.append(data)
-                    self.queue.task_done()
+                else:
+                    logger.warning(f"DATA is NONE")
+                self.queue.task_done()
             except Exception as e:
-                print(f"CONSUMER ERRRO: {e}")
+                # print(f"CONSUMER ERRROR: {e}")
+                logger.errror(f"CONSUMER ERROR: {e}")
                 self.queue.task_done()
                 pass
 
     async def __run(self,callback: Optional[Callable] = None, **fixed_kwargs):
         producers = [asyncio.create_task(self.__produce(chunk, **fixed_kwargs)) for chunk in self.url_chunk]
-        asyncio.gather(*producers)
         consumers = [asyncio.create_task(self.__consume(callback)) for i in range(self.N_CONSUMERS)]
+        print(f"N PRODUCERS: {len(producers)}")
+        print(producers[0])
         await asyncio.gather(*producers)
         
         await self.queue.join()
@@ -78,7 +101,7 @@ class AsyncRequests:
 
 class AsyncHTTP(AsyncRequests):
 
-    def __init__(self, url: List[str], N_PRODUCERS, N_CONSUMERS):
+    def __init__(self, url: List[RequestObject], N_PRODUCERS, N_CONSUMERS):
         super().__init__(url, N_PRODUCERS, N_CONSUMERS)
 
     
