@@ -109,3 +109,7 @@ class AsyncHTTP(AsyncRequests):
     def async_delete(self, callback: Optional[Callable] = None,**kwargs):
         self.request_type = RequestType.DELETE
         asyncio.run(self._AsyncRequests__run(callback, **kwargs))
+
+    def async_head(self, callback: Optional[Callable] = None,**kwargs):
+        self.request_type = RequestType.HEAD
+        asyncio.run(self._AsyncRequests__run(callback, **kwargs))

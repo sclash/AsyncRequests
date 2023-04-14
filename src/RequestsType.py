@@ -8,6 +8,8 @@ class RequestType(Enum):
     PUT = lambda url,**kwargs: requests.put(url, **kwargs)
     PATCH = lambda url,**kwargs: requests.patch(url, **kwargs)
     DELETE = lambda url,**kwargs: requests.delete(url, **kwargs)
+    HEAD = lambda url,**kwargs: requests.head(url, **kwargs)
+
 
 
 

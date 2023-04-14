@@ -17,13 +17,15 @@ The library provide support for asynchronous http request, using the consumer-pr
 
 Instantiate the class `AsyncHTTP` specifying a list of `RequestObject`, (you can specify `N_PRODUCERS` and `N_CONSUMERS`: default values are `50` for both)
 
-The `RequestObject` supports all keyword arguments of the reqeusts methods (`headers`,`params`,`data`, ...). It allows you to specify different keyword arguments across different requests 
+The `RequestObject` supports all keyword arguments of the requests methods (`headers`,`params`,`data`, ...). It allows you to specify different keyword arguments across different requests 
 
 ```python
 from AysncRequests import AsyncHTPP
 from RequestObject import RequestObject
 
-api = 'https://api.publicapis.org/entries' # Public API endpoint, it retrieves all public APIs listed under params specification Refer to this if you want to know more https://api.publicapis.org/
+# Public API endpoint, it retrieves all public APIs listed under params specification
+# Refer to this if you want to know more https://api.publicapis.org/
+api = 'https://api.publicapis.org/entries'
 
 # default N_PRODUCERS and N_CONSUMERS to 50 
 
@@ -46,8 +48,8 @@ r = AsyncHTTP(
 )
 ```
 
-To get the responses you can either call the generic `async_request` method explicitly specifying the http request type by passing to the `request_type` argument a `RequestType` Enum (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`),
-or you can use the `async_get`, `async_post`, `async_delete`,`async_put`, `async_patch` method without having to spepcify the request type.
+To get the responses you can either call the generic `async_request` method explicitly specifying the http request type by passing to the `request_type` argument a `RequestType` Enum (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`),
+or you can use the `async_get`, `async_post`, `async_delete`,`async_put`, `async_patch`, `async_head` method without having to spepcify the request type.
 
 ```python
 from RequestsType import RequestType
