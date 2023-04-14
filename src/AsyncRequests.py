@@ -51,8 +51,6 @@ class AsyncRequests:
         except Exception as e:
             self.error_response.append((r_obj, r.status_code))
             logger.error(f"Request ERROR for {r_obj.url}: {e}")
-
-            # print(f"Request exception: {e}")
             return r.status_code
     
     async def __async_http_thread(self, r_obj: RequestObject, **fixed_kwargs):
@@ -61,9 +59,7 @@ class AsyncRequests:
     async def __produce(self, chunk: List[RequestObject], **fixed_kwargs):
         try:
             for r_obj in chunk:
-                # logger.info(f"Producer checking: {r_obj.url}")
                 r = await self.__async_http_thread(r_obj, **fixed_kwargs)
-
                 await self.queue.put(r)
         except Exception as e:
             logger.error(f"PRODUCER ERROR: {r_obj}")
@@ -82,7 +78,6 @@ class AsyncRequests:
                     logger.warning(f"DATA is NONE")
                 self.queue.task_done()
             except Exception as e:
-                # print(f"CONSUMER ERRROR: {e}")
                 logger.errror(f"CONSUMER ERROR: {e}")
                 self.queue.task_done()
                 pass
@@ -90,8 +85,6 @@ class AsyncRequests:
     async def __run(self,callback: Optional[Callable] = None, **fixed_kwargs):
         producers = [asyncio.create_task(self.__produce(chunk, **fixed_kwargs)) for chunk in self.url_chunk]
         consumers = [asyncio.create_task(self.__consume(callback)) for i in range(self.N_CONSUMERS)]
-        print(f"N PRODUCERS: {len(producers)}")
-        print(producers[0])
         await asyncio.gather(*producers)
         
         await self.queue.join()
