@@ -2,10 +2,13 @@
 
 Python library to handle asynchronous http requests, built on top of the [requests](https://requests.readthedocs.io/en/latest/) library 
 
+
 - [Installation](#installation)
 - [Usage](#usage)
 
 ## Installation
+
+[PyPI page](https://pypi.org/project/async-http-requests/)
 
 ```bash
 pip install async-http-requests

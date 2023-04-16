@@ -60,8 +60,12 @@ class AsyncRequests:
         try:
             for r_obj in chunk:
                 r = await self.__async_http_thread(r_obj, **fixed_kwargs)
-                await self.queue.put(r)
+                if r:
+                    await self.queue.put(r)
+                else:
+                    await self.queue.put(None)
         except Exception as e:
+            self.error_response.append((r_obj, r.status_code))
             logger.error(f"PRODUCER ERROR: {r_obj}")
             print(e)
 
