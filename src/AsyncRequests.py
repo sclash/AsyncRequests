@@ -8,6 +8,7 @@ from typing import List, Callable, Optional
 from RequestsType import RequestType
 from RequestObject import RequestObject
 from dataclasses import asdict
+import pandas as pd
 
 import logging
 
@@ -37,6 +38,7 @@ class AsyncRequests:
         self.url_chunk = split_chunk(self.url, self.N_PRODUCERS)
         self.response = []
         self.error_response = []
+        self.error_data: pd.DataFrame = None
 
     def sync_http(self, r_obj: RequestObject, **fixed_kwargs):
         try:
@@ -49,9 +51,11 @@ class AsyncRequests:
             logger.info(f"SUCCESSFULL Request for {r_obj.url} - {var_kwargs}")
             return r
         except Exception as e:
-            self.error_response.append((r_obj, r.status_code))
+            # self.error_response.append((r_obj, r.status_code))
+            self.error_response.append((r_obj) )
+
             logger.error(f"Request ERROR for {r_obj.url}: {e}")
-            return r.status_code
+            # return r.status_code
     
     async def __async_http_thread(self, r_obj: RequestObject, **fixed_kwargs):
         return await asyncio.to_thread(self.sync_http, r_obj , **fixed_kwargs)
@@ -65,7 +69,9 @@ class AsyncRequests:
                 else:
                     await self.queue.put(None)
         except Exception as e:
-            self.error_response.append((r_obj, r.status_code))
+            # self.error_response.append((r_obj, r.status_code))
+            # self.error_response.append(asdict(r_obj)| {'status_code': r.status_code, 'response': r.text})
+            self.error_response.append((r_obj))
             logger.error(f"PRODUCER ERROR: {r_obj}")
             print(e)
 
@@ -95,6 +101,11 @@ class AsyncRequests:
         for c in consumers:
             c.cancel()
 
+        if len(self.error_response) > 0:
+            self.error_data = pd.DataFrame()
+            for err in self.error_response:
+                self.error_data = pd.concat([self.error_data, pd.DataFrame(asdict(err)) ])
+                
 
 class AsyncHTTP(AsyncRequests):
 

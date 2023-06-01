@@ -8,9 +8,12 @@ headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/5
 
 endpoints = [RequestObject(url = api, params = {"title":"cat"}),
              RequestObject(url = api, params = {"title":"dog"}),
+             RequestObject(url = 'https://fuckweb.com/', params = {"title":"fica"}),
              RequestObject(url = api, params = {"title":"house"}),
              RequestObject(url = api, params = {"title":"weath"}),
+             RequestObject(url = 'https://fuckweb.com/', params = {"title":"cazzo"}),
              RequestObject(url = api, params = {"title":"py"})]
+             
 
 a = AsyncHTTP(
     url = endpoints,
@@ -25,13 +28,15 @@ start = perf_counter()
 a.async_request(
     request_type= RequestType.GET,
     callback=get_json,
-    headers = headers
+    headers = headers, 
+    timeout = 5
 )
 # print(a.response)
 end = perf_counter()
 print(f"Async EXECUTION TIME: {end-start}")
 
-
+len(a.response)
+len(a.error_data)
 
 import requests
 
@@ -46,3 +51,14 @@ print(f"Sync EXECUTION TIME: {end-start}")
 
 len(a.response)
 
+
+
+requests.get(url = api , params = {"tile":"cazzo"})
+
+
+
+# import pandas as pd
+# from dataclasses import asdict
+err = a.error_response
+# df = pd.DataFrame()
+# asdict(err[0][0])

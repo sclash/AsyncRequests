@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "async-http-requests"
-version = "0.0.1"
+version = "0.0.2"
 description = "Asynchronous HTTP requests"
 readme = "README.md"
 authors = [{ name = "Andrea Sergi", email = "andrea.serg1@gmail.com" }]
@@ -24,8 +24,8 @@ dependencies = [
 ]
 requires-python = ">=3.9"
 
-[project.optional-dependencies]
-dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
+# [project.optional-dependencies]
+# dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
 
 [project.urls]
 Homepage = "https://github.com/sclash/AsyncRequests"
