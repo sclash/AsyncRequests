@@ -8,10 +8,10 @@ headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/5
 
 endpoints = [RequestObject(url = api, params = {"title":"cat"}),
              RequestObject(url = api, params = {"title":"dog"}),
-             RequestObject(url = 'https://fuckweb.com/', params = {"title":"fica"}),
+             RequestObject(url = 'http://fnkudshgjdfjgbfdk.com/', params = {"title":"fkhsudh"}), # should return an error
              RequestObject(url = api, params = {"title":"house"}),
              RequestObject(url = api, params = {"title":"weath"}),
-             RequestObject(url = 'https://fuckweb.com/', params = {"title":"cazzo"}),
+             RequestObject(url = 'http://fnkudshgjdfjgbfdk.com/', params = {"title":"nfusdhif"}), #should return an error
              RequestObject(url = api, params = {"title":"py"})]
              
 
@@ -53,7 +53,7 @@ len(a.response)
 
 
 
-requests.get(url = api , params = {"tile":"cazzo"})
+requests.get(url = api , params = {"tile":"sdvdfssf"})
 
 
 
