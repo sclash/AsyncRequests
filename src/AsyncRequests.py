@@ -103,8 +103,8 @@ class AsyncRequests:
 
         if len(self.error_response) > 0:
             self.error_data = pd.DataFrame()
-            for err in self.error_response:
-                self.error_data = pd.concat([self.error_data, pd.DataFrame(asdict(err)) ])
+            for idx, err in enumerate(self.error_response):
+                self.error_data = pd.concat([self.error_data, pd.DataFrame(asdict(err), index = [idx]) ])
                 
 
 class AsyncHTTP(AsyncRequests):
