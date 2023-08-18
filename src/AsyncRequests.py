@@ -88,7 +88,7 @@ class AsyncRequests:
                     logger.warning(f"DATA is NONE")
                 self.queue.task_done()
             except Exception as e:
-                logger.errror(f"CONSUMER ERROR: {e}")
+                logger.error(f"CONSUMER ERROR: {e}")
                 self.queue.task_done()
                 pass
 
