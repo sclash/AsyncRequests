@@ -50,8 +50,8 @@ class AsyncRequests:
 
     def __init__(self, url: List[RequestObject], 
                 request_type:RequestType = None,
-                N_PRODUCERS: Optional[int] = 50,
-                N_CONSUMERS: Optional[int] = 50):
+                N_PRODUCERS: Optional[int] = 10,
+                N_CONSUMERS: Optional[int] = 10):
         self.url = url
         self.request_type = request_type
         self.queue = asyncio.Queue()
