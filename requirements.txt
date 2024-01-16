@@ -1,8 +1,4 @@
 requests
 requests-oauthlib
-<<<<<<< HEAD
-dataclasses
-=======
 dataclasses
 progressbar2
->>>>>>> 5996166 (performance imporvement - unsuccessful requests handling - progressbar tracking)
