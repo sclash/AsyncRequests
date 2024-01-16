@@ -5,12 +5,8 @@ dist/
 *.pypirc
 debug.py\
 PyPinotes.md
-<<<<<<< HEAD
-test/debug.py
-=======
 test/debug.py
 httpx_test.py
 debug.py
 client_test.py
 .vscode/
->>>>>>> 5996166 (performance imporvement - unsuccessful requests handling - progressbar tracking)
