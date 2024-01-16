@@ -3,14 +3,10 @@ from enum import Enum
 import requests
 
 class RequestType(Enum):
-    GET = lambda url,**kwargs: requests.get(url, **kwargs)
-    POST = lambda url,**kwargs: requests.post(url, **kwargs)
-    PUT = lambda url,**kwargs: requests.put(url, **kwargs)
-    PATCH = lambda url,**kwargs: requests.patch(url, **kwargs)
-    DELETE = lambda url,**kwargs: requests.delete(url, **kwargs)
-    HEAD = lambda url,**kwargs: requests.head(url, **kwargs)
+    GET = lambda url, session, **kwargs: session.get(url, **kwargs)
+    POST = lambda url, session, **kwargs: session.post(url, **kwargs)
+    PUT = lambda url, session, **kwargs: session.put(url, **kwargs)
+    PATCH = lambda url, session, **kwargs: session.patch(url, **kwargs)
+    DELETE = lambda url, session, **kwargs: session.delete(url, **kwargs)
+    HEAD = lambda url, session, **kwargs: session.head(url, **kwargs)
 
-
-
-
-# RequestType.GET('https://google.com')

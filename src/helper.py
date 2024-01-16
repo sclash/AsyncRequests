@@ -19,3 +19,4 @@ def split_chunk(l:list, N_PRODUCERS)->list:
             else:
                 chunk.append(l[i*x:])
         return chunk
+    

@@ -19,4 +19,10 @@ class RequestObject:
     stream:bool=None
     verify:bool = True
     cert:str | tuple = None
+<<<<<<< HEAD
     json:dict=None
+=======
+    json:dict=None
+    status: int = None
+    request_error: str = None
+>>>>>>> 5996166 (performance imporvement - unsuccessful requests handling - progressbar tracking)
