@@ -20,3 +20,5 @@ class RequestObject:
     verify:bool = True
     cert:str | tuple = None
     json:dict=None
+    status: int = None
+    request_error: str = None
