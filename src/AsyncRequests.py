@@ -76,17 +76,13 @@ class AsyncRequests:
         except requests.exceptions.HTTPError as e_http:
             r_obj.status = e_http.response.status_code
             r_obj.request_error = e_http.__class__().__repr__()
-
             self.error_response.append((r_obj) )
-
             logger.error(f"Request ERROR for {r_obj.url}: {e_http}")
         except requests.exceptions.ConnectionError as e_conn:
             r_obj.request_error = e_conn.__class__().__repr__()
             self.error_response.append((r_obj))
             logger.error(f"Request ERROR for {r_obj.url}: {e_conn}")
-        except Exception as e:
-            self.error_response.append((r_obj))
-            logger.error(f"Request ERROR for {r_obj.url}: {e}")
+
 
 
     

@@ -7,7 +7,7 @@ BASE_URL  ='https://httpbin.org/get'
 # BASE_URL  ='http://faurghlsuihgsflgb.com'
 # BASE_URL  ='https://httpbin.org/get/status/404'
 import time 
-N_REQUESTS = 10_000
+N_REQUESTS = 1_000
 
 def main_async_http():
     try:
