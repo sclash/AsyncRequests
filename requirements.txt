@@ -2,3 +2,4 @@ requests
 requests-oauthlib
 dataclasses
 progressbar2
+pandas
