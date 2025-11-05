@@ -14,6 +14,9 @@ import logging
 
 import progressbar
 
+from concurrent.futures import ThreadPoolExecutor
+import os
+
 
 c_handler = logging.StreamHandler()
 c_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(lineno)s - %(message)s', datefmt= '%d-%m-%Y %H:%M:%S')
@@ -146,17 +149,25 @@ class AsyncRequests:
 
 class AsyncHTTP(AsyncRequests):
 
-    def __init__(self, url: List[RequestObject], N_PRODUCERS = 10, N_CONSUMERS = 10):
+    def __init__(self,  url: List[RequestObject], N_PRODUCERS = 10, N_CONSUMERS = 10):
         super().__init__(url, None, N_PRODUCERS, N_CONSUMERS)
 
     
     def async_request(self,
+                      multithreaded: bool,
                       request_type: Callable,
                       callback: Optional[Callable] = None,
                       max_retries = 0,
                       **kwargs):
         self.request_type = request_type
-        asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs))
+        if not multithreaded:
+            asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs))
+        else:
+            workers = os.cpu_count()
+            logger.info(f"multithreaded |  {workers} of workers")
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                for _ in range(workers):
+                    executor.submit(lambda: asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs)))
 
     
     def async_get(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):

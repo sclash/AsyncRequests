@@ -2,7 +2,7 @@ from src.AsyncRequests import AsyncHTTP, RequestType, RequestObject
 from time import perf_counter
 
 BRANCH = "free-thread"
-N_REQUESTS = 10000
+N_REQUESTS = 1000
 url = [RequestObject(url = "https://mockhttp.org") for _ in range(N_REQUESTS)]
 
 
@@ -10,6 +10,7 @@ start = perf_counter()
 a = AsyncHTTP(url = url)
 a.async_request(
     request_type=RequestType.GET,
+    multithreaded=True
 )
 end = perf_counter()
 
