@@ -82,7 +82,7 @@ class AsyncRequests:
     async def __async_http_thread(self, r_obj: RequestObject, session: requests.Session, **fixed_kwargs):
         return await asyncio.to_thread(self.sync_http, r_obj , session,  **fixed_kwargs)
     
-    async def __produce(self, chunk: List[RequestObject], **fixed_kwargs):
+    async def __produce(self, thread_name: int, chunk: List[RequestObject], **fixed_kwargs):
         try:
             with requests.Session() as session:
                 for r_obj in chunk:
@@ -95,13 +95,13 @@ class AsyncRequests:
                             try:
                                 self.error_response.remove(r_obj)
                             except Exception as e :
-                                logger.error(f"PRODUCER ERROR at : {r_obj} | {e}")
+                                logger.error(f"PRODUCER ERROR at : {r_obj} | {e} - Thread {thread_name}")
                     else:
                         await self.queue.put(None)
         except Exception as e:
-            logger.error(f"PRODUCER ERROR: {chunk} | {e}")
+            logger.error(f"PRODUCER ERROR: {chunk} | {e} - Thread {thread_name}")
 
-    async def __consume(self, callback: Optional[Callable] = None):
+    async def __consume(self, thread_name: int, callback: Optional[Callable] = None):
         while True:
             try:
                 data = await self.queue.get()
@@ -111,17 +111,18 @@ class AsyncRequests:
                     else:
                         self.response.append(data)
                 else:
-                    logger.warning(f"DATA is NONE")
+                    logger.warning(f"DATA is NONE - Thread {thread_name}")
                 self.queue.task_done()
             except Exception as e:
-                logger.error(f"CONSUMER ERROR: {e}")
+                logger.error(f"CONSUMER ERROR: {e} - Thread {thread_name}")
                 self.queue.task_done()
                 pass
 
 
-    async def __run(self,callback: Optional[Callable] = None, max_retries: int = 0, **fixed_kwargs):
-        producers = [asyncio.create_task(self.__produce(chunk, **fixed_kwargs)) for chunk in self.url_chunk]
-        consumers = [asyncio.create_task(self.__consume(callback)) for _ in range(self.N_CONSUMERS)]
+    async def __run(self,thread_name: int, callback: Optional[Callable] = None, max_retries: int = 0, **fixed_kwargs):
+        logger.info(f"Thread: {thread_name}")
+        producers = [asyncio.create_task(self.__produce(thread_name, chunk, **fixed_kwargs)) for chunk in self.url_chunk]
+        consumers = [asyncio.create_task(self.__consume(thread_name, callback)) for _ in range(self.N_CONSUMERS)]
         await asyncio.gather(*producers)
         
         await self.queue.join()
@@ -161,13 +162,14 @@ class AsyncHTTP(AsyncRequests):
                       **kwargs):
         self.request_type = request_type
         if not multithreaded:
-            asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs))
+            asyncio.run(self._AsyncRequests__run( 1,callback, max_retries, **kwargs))
         else:
             workers = os.cpu_count()
-            logger.info(f"multithreaded |  {workers} of workers")
-            with ThreadPoolExecutor(max_workers=workers) as executor:
-                for _ in range(workers):
-                    executor.submit(lambda: asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs)))
+            if workers:
+                logger.info(f"multithreaded |  {workers} workers")
+                with ThreadPoolExecutor(max_workers=workers) as executor:
+                    for i in range(workers):
+                        executor.submit(lambda: asyncio.run(self._AsyncRequests__run( i,callback, max_retries, **kwargs)))
 
     
     def async_get(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):

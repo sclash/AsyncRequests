@@ -2,7 +2,7 @@ from src.AsyncRequests import AsyncHTTP, RequestType, RequestObject
 from time import perf_counter
 
 BRANCH = "free-thread"
-N_REQUESTS = 1000
+N_REQUESTS = 4
 url = [RequestObject(url = "https://mockhttp.org") for _ in range(N_REQUESTS)]
 
 
@@ -16,6 +16,7 @@ end = perf_counter()
 
 print(a.response)
 print(len( a.response ))
+print(len( a.error_response ))
 
 print(BRANCH)
 print(f"Time elapsed for {N_REQUESTS}: {end-start}")
