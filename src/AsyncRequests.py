@@ -33,25 +33,18 @@ widgets = [' [',
         ]
 
 
-# global bar_idx
-# bar_idx = 0
-
 class AsyncRequests:
 
-
-    url:List[str]
-    queue: asyncio.Queue()
+    url:List[RequestObject]
+    queue: asyncio.Queue
     N_PRODUCERS: int
     N_CONSUMERS: int
     response: List[requests.Response]
 
-
-
-
     def __init__(self, url: List[RequestObject], 
-                request_type:RequestType = None,
-                N_PRODUCERS: Optional[int] = 10,
-                N_CONSUMERS: Optional[int] = 10):
+                request_type: Optional[RequestType] = None,
+                N_PRODUCERS: int = 10,
+                N_CONSUMERS: int = 10):
         self.url = url
         self.request_type = request_type
         self.queue = asyncio.Queue()
@@ -60,19 +53,20 @@ class AsyncRequests:
         self.url_chunk = split_chunk(self.url, self.N_PRODUCERS)
         self.response = []
         self.error_response = []
-        self.error_data: pd.DataFrame = None
+        self.error_data: Optional[pd.DataFrame] = None
         self.bar_idx = 0
-        self.bar = progressbar.ProgressBar(max_value=len(self.url), 
-                            widgets=widgets).start()
+        self.bar = progressbar.ProgressBar(max_value=len(self.url), widgets=widgets).start()
+
     def sync_http(self, r_obj: RequestObject, session: requests.Session, **fixed_kwargs):
         try:
             url = r_obj.url
             var_kwargs = {k: asdict(r_obj)[k] for k in asdict(r_obj).keys() if k != 'url' and asdict(r_obj)[k]!=None} 
             kwargs = var_kwargs | fixed_kwargs
-            r = self.request_type(url, session, **kwargs)
-            r_obj.status = r.status_code
-            r.raise_for_status()
-            return r
+            if self.request_type:
+                r = self.request_type(url, session, **kwargs)
+                r_obj.status = r.status_code
+                r.raise_for_status()
+                return r
         except requests.exceptions.HTTPError as e_http:
             r_obj.status = e_http.response.status_code
             r_obj.request_error = e_http.__class__().__repr__()
@@ -83,8 +77,6 @@ class AsyncRequests:
             self.error_response.append((r_obj))
             logger.error(f"Request ERROR for {r_obj.url}: {e_conn}")
 
-
-
     
     async def __async_http_thread(self, r_obj: RequestObject, session: requests.Session, **fixed_kwargs):
         return await asyncio.to_thread(self.sync_http, r_obj , session,  **fixed_kwargs)
@@ -93,8 +85,6 @@ class AsyncRequests:
         try:
             with requests.Session() as session:
                 for r_obj in chunk:
-                    r_obj.status = None
-                    r_obj.request_error = None
                     r = await self.__async_http_thread(r_obj, session, **fixed_kwargs)
                     self.bar_idx += 1
                     self.bar.update(self.bar_idx)
@@ -103,13 +93,12 @@ class AsyncRequests:
                         if r_obj.url in [r_err.url for r_err in self.error_response]:
                             try:
                                 self.error_response.remove(r_obj)
-                            except:
-                                pass
+                            except Exception as e :
+                                logger.error(f"PRODUCER ERROR at : {r_obj} | {e}")
                     else:
                         await self.queue.put(None)
         except Exception as e:
-            logger.error(f"PRODUCER ERROR: {r_obj}")
-            print(e)
+            logger.error(f"PRODUCER ERROR: {chunk} | {e}")
 
     async def __consume(self, callback: Optional[Callable] = None):
         while True:
@@ -131,7 +120,7 @@ class AsyncRequests:
 
     async def __run(self,callback: Optional[Callable] = None, max_retries: int = 0, **fixed_kwargs):
         producers = [asyncio.create_task(self.__produce(chunk, **fixed_kwargs)) for chunk in self.url_chunk]
-        consumers = [asyncio.create_task(self.__consume(callback)) for i in range(self.N_CONSUMERS)]
+        consumers = [asyncio.create_task(self.__consume(callback)) for _ in range(self.N_CONSUMERS)]
         await asyncio.gather(*producers)
         
         await self.queue.join()
@@ -151,7 +140,7 @@ class AsyncRequests:
                         self.bar.max_value += len(self.error_response)
                         logger.info(f"{i+1}# RETRY / {max_retries}")
                         producers = [asyncio.create_task(self.__produce(chunk, **fixed_kwargs)) for chunk in error_chunk]
-                        consumers = [asyncio.create_task(self.__consume(callback)) for i in range(self.N_CONSUMERS)]
+                        consumers = [asyncio.create_task(self.__consume(callback)) for _ in range(self.N_CONSUMERS)]
                         await asyncio.gather(*producers)
                         
                         await self.queue.join()
@@ -163,16 +152,16 @@ class AsyncRequests:
 class AsyncHTTP(AsyncRequests):
 
     def __init__(self, url: List[RequestObject], N_PRODUCERS = 10, N_CONSUMERS = 10):
-        super().__init__(url, N_PRODUCERS, N_CONSUMERS)
+        super().__init__(url, None, N_PRODUCERS, N_CONSUMERS)
 
     
-    def async_request(self, 
-                      request_type: RequestType,
+    def async_request(self,
+                      request_type: Callable,
                       callback: Optional[Callable] = None,
                       max_retries = 0,
                       **kwargs):
         self.request_type = request_type
-        asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs))
+        asyncio.run(self.__run(callback, max_retries, **kwargs))
 
     
     def async_get(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):

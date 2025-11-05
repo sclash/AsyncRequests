@@ -1,10 +1,12 @@
-from AsyncRequests import AsyncHTTP, RequestType, RequestObject
+# from AsyncRequests import AsyncHTTP, RequestType, RequestObject
+from ..src.AsyncRequests import AsyncHTTP, RequestType, RequestObject
 from time import perf_counter
-from dataclasses import asdict
 
 api = 'https://api.publicapis.org/entries'
 headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'}
 
+
+print("BRANCH: free-threading")
 
 
 # 5 requests should be succesfull and 3 not
@@ -31,11 +33,12 @@ def get_json(r):
 start = perf_counter()
 a.async_request(
     request_type= RequestType.GET,
-    # max_retries=5,
+    max_retries=5,
     callback=get_json,
     headers = headers, 
     timeout = 5
 )
+
 # print(a.response)
 end = perf_counter()
 print(f"Async EXECUTION TIME: {end-start}")

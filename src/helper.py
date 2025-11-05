@@ -1,9 +1,4 @@
 
-import json
-from typing import Union, List
-import datetime as dt
-
-
 def split_chunk(l:list, N_PRODUCERS)->list:
     """
     split list in chunks to avoid too many threads

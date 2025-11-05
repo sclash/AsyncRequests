@@ -5,7 +5,7 @@ dist/
 *.egg-info/
 dist/
 *.pypirc
-debug.py\
+debug.py/
 PyPinotes.md
 test/debug.py
 httpx_test.py
