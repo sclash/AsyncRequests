@@ -1,8 +1,8 @@
-from AsyncRequests import AsyncHTTP, RequestType, RequestObject
+from src.AsyncRequests import AsyncHTTP, RequestType, RequestObject
 from time import perf_counter
 
 BRANCH = "free-thread"
-N_REQUESTS = 1000
+N_REQUESTS = 10000
 url = [RequestObject(url = "https://mockhttp.org") for _ in range(N_REQUESTS)]
 
 
