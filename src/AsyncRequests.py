@@ -8,7 +8,6 @@ from typing import List, Callable, Optional
 from RequestsType import RequestType
 from RequestObject import RequestObject
 from dataclasses import asdict
-import pandas as pd
 
 
 import logging
@@ -53,7 +52,6 @@ class AsyncRequests:
         self.url_chunk = split_chunk(self.url, self.N_PRODUCERS)
         self.response = []
         self.error_response = []
-        self.error_data: Optional[pd.DataFrame] = None
         self.bar_idx = 0
         self.bar = progressbar.ProgressBar(max_value=len(self.url), widgets=widgets).start()
 
@@ -128,9 +126,6 @@ class AsyncRequests:
             c.cancel()
 
         if len(self.error_response) > 0:
-            self.error_data = pd.DataFrame()
-            for idx, err in enumerate(self.error_response):
-                self.error_data = pd.concat([self.error_data, pd.DataFrame(asdict(err), index = [idx]) ])
             if max_retries >0:
                 errors = [{k:v for k,v in asdict(req).items() if k!= 'status' and k!='request_error'} for req in self.error_response]
                 errors_req = [RequestObject(**err) for err in errors]
@@ -161,7 +156,7 @@ class AsyncHTTP(AsyncRequests):
                       max_retries = 0,
                       **kwargs):
         self.request_type = request_type
-        asyncio.run(self.__run(callback, max_retries, **kwargs))
+        asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs))
 
     
     def async_get(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):
