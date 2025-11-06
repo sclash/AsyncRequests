@@ -5,10 +5,11 @@ dist/
 *.egg-info/
 dist/
 *.pypirc
-debug.py\
+debug.py/
 PyPinotes.md
 test/debug.py
 httpx_test.py
 debug.py
 client_test.py
 .vscode/
+test/test_dp.py
