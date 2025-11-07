@@ -32,13 +32,9 @@ widgets = [' [',
         ]
 
 
-# global queue 
-# queue = asyncio.Queue()
-
-class AsyncRequests:
+class _AsyncRequests:
 
     url:List[RequestObject]
-    queue: asyncio.Queue
     N_PRODUCERS: int
     N_CONSUMERS: int
     response: List[requests.Response]
@@ -49,7 +45,6 @@ class AsyncRequests:
                 N_CONSUMERS: int = 10):
         self.url = url
         self.request_type = request_type
-        self.queue = asyncio.Queue()
         self.N_PRODUCERS = N_PRODUCERS
         self.N_CONSUMERS = N_CONSUMERS
         self.url_chunk = split_chunk(self.url, self.N_PRODUCERS)
@@ -183,16 +178,21 @@ class AsyncRequests:
 
                 
 
-class AsyncHTTP(AsyncRequests):
+class AsyncHTTP(_AsyncRequests):
 
-    def __init__(self,  url: List[RequestObject], N_PRODUCERS = 10, N_CONSUMERS = 10):
+    def __init__(self,  
+                 url: List[RequestObject],
+                 N_PRODUCERS = 10,
+                 N_CONSUMERS = 10,
+                 multithreaded: bool = False,
+                 workers: Optional[int] = os.cpu_count()):
         super().__init__(url, None, N_PRODUCERS, N_CONSUMERS)
+        self.multithreaded = multithreaded
+        self.workers = workers
 
     
     def async_request(self,
                       request_type: Callable,
-                      multithreaded: bool = False,
-                      workers: Optional[int] = os.cpu_count(),
                       callback: Optional[Callable] = None,
                       max_retries = 0,
                       **kwargs):
@@ -209,11 +209,11 @@ class AsyncHTTP(AsyncRequests):
         """
         self.request_type = request_type
         url_chunk = split_chunk(self.url, os.cpu_count())
-        if multithreaded:
-            if workers:
-                logger.info(f"multithreaded |  {workers} workers")
-                with ThreadPoolExecutor(max_workers=workers) as executor:
-                    url_chunk = split_chunk(self.url, workers)
+        if self.multithreaded:
+            if self.workers:
+                logger.info(f"multithreaded |  {self.workers} workers")
+                with ThreadPoolExecutor(max_workers=self.workers) as executor:
+                    url_chunk = split_chunk(self.url, self.workers)
                     for i,chunk in enumerate(url_chunk):
                         executor.submit(lambda: asyncio.run(self._AsyncRequests__run( chunk, i, callback, max_retries, **kwargs)))
         else:
