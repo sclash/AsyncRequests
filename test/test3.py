@@ -9,8 +9,13 @@ url = [RequestObject(url = "https://mockhttp.org") for _ in range(N_REQUESTS)]
 start = perf_counter()
 a = AsyncHTTP(url = url,
               multithreaded=True)
-a.async_request(
-    request_type=RequestType.GET,
+# a.async_request(
+#     request_type=RequestType.GET,
+#     callback=lambda x : x,
+#     max_retries=5
+# )
+
+a.async_get(
     callback=lambda x : x,
     max_retries=5
 )

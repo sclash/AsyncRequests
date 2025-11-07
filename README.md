@@ -12,7 +12,12 @@ Python library to handle asynchronous http requests, built on top of the [reques
 
 ```bash
 pip install async-http-requests
+
 ```
+
+## Update
+
+Added support for python free-threading builds, using `concurrent.futures.ThreadPoolExecutor`
 
 ## Usage
 
@@ -45,6 +50,8 @@ requests = AsyncHTTP(
 
 requests = AsyncHTTP(
     url = endpoints,
+    multithreding = True, # bool
+    workers = 4, # number of threads, default is os.cpu_count()
     N_PRODUCERS = 10,
     N_CONSUMERS = 10
 )

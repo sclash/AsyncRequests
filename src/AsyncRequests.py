@@ -221,25 +221,57 @@ class AsyncHTTP(_AsyncRequests):
 
     
     def async_get(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):
-        self.request_type = RequestType.GET
-        asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs))
+        return self.async_request(
+            request_type= RequestType.GET,
+            callback= callback,
+            max_retries = max_retries,
+            **kwargs
+        )
 
-    def async_post(self, callback: Optional[Callable] = None, max_retries = 0 ,**kwargs):
-        self.request_type = RequestType.POST
-        asyncio.run(self._AsyncRequests__run(callback,  max_retries, **kwargs))
-    
-    def async_put(self, callback: Optional[Callable] = None,  max_retries = 0, **kwargs):
-        self.request_type = RequestType.PUT
-        asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs))
+    def async_post(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):
+        return self.async_request(
+            request_type= RequestType.POST,
+            callback= callback,
+            max_retries = max_retries,
+            **kwargs
+        )
 
-    def async_patch(self, callback: Optional[Callable] = None, max_retries = 0,**kwargs):
-        self.request_type = RequestType.PATCH
-        asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs))
+    def async_put(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):
+        return self.async_request(
+            request_type= RequestType.PUT,
+            callback= callback,
+            max_retries = max_retries,
+            **kwargs
+        )
+
+    def async_patch(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):
+        return self.async_request(
+            request_type= RequestType.PATCH,
+            callback= callback,
+            max_retries = max_retries,
+            **kwargs
+        )
     
-    def async_delete(self, callback: Optional[Callable] = None, max_retries = 0,**kwargs):
-        self.request_type = RequestType.DELETE
-        asyncio.run(self._AsyncRequests__run(callback,  max_retries, **kwargs))
+    def async_delete(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):
+        return self.async_request(
+            request_type= RequestType.DELETE,
+            callback= callback,
+            max_retries = max_retries,
+            **kwargs
+        )
 
     def async_head(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):
-        self.request_type = RequestType.HEAD
-        asyncio.run(self._AsyncRequests__run(callback, max_retries, **kwargs))
+        return self.async_request(
+            request_type= RequestType.HEAD,
+            callback= callback,
+            max_retries = max_retries,
+            **kwargs
+        )
+
+    def async_options(self, callback: Optional[Callable] = None, max_retries = 0, **kwargs):
+        return self.async_request(
+            request_type= RequestType.OPTIONS,
+            callback= callback,
+            max_retries = max_retries,
+            **kwargs
+        )
