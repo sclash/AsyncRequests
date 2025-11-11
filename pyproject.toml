@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "async-http-requests"
-version = "0.0.6"
+version = "0.7.1"
 description = "Asynchronous HTTP requests"
 readme = "README.md"
 authors = [{ name = "Andrea Sergi", email = "andrea.serg1@gmail.com" }]
@@ -23,7 +23,6 @@ dependencies = [
     'tomli>=2.0.1; python_version < "3.11"',
     "setuptools>=80.9.0",
     "progressbar2>=4.5.0",
-    "pandas>=2.3.3",
 ]
 requires-python = ">=3.9"
 
